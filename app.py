@@ -1089,13 +1089,31 @@ def push_discord(url: str, results: List[dict]) -> bool:
             fire_str = "🔥"*min(fs,4) if fs>=3 else ""
             v = f"`現價 {p:.1f}` → `目標 {tp:.1f}` (**{up:+.1f}%**)" if (p and tp and up is not None) else "—"
             fields.append({"name":f"{em} {fire_str} {d['code']} {nm} · {d.get('score',0)}分 · 點火{fs}","value":v,"inline":False})
-        r = requests.post(url, json={"embeds":[{
+        
+        payload = {"embeds":[{
             "title":f"⚡ 台股狙擊手 v10 · {now}",
             "color":0x00e87a,"fields":fields,
             "footer":{"text":"技術/籌碼/型態三重濾網 · 僅供參考"}
-        }]}, timeout=8)
-        return r.status_code in (200,204)
-    except: return False
+        }]}
+
+        # 稍微加長 timeout，避免雲端環境延遲
+        r = requests.post(url, json=payload, timeout=10) 
+        
+        # 如果不是 200 或 204，代表 Discord 拒絕了你的請求
+        if r.status_code not in (200, 204):
+            import streamlit as st
+            st.error(f"Discord API 錯誤: 狀態碼 {r.status_code}, 回應: {r.text}")
+            return False
+            
+        return True
+    except requests.exceptions.Timeout:
+        import streamlit as st
+        st.error("連線到 Discord 超時 (Timeout)，請檢查伺服器網路狀態。")
+        return False
+    except Exception as e:
+        import streamlit as st
+        st.error(f"發送 Discord 時發生例外錯誤: {str(e)}")
+        return False
 
 def results_to_csv(results: List[dict]) -> bytes:
     rows = []
