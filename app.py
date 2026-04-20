@@ -55,7 +55,9 @@ CSS = """
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body,[class*="css"]{font-family:var(--tc)!important;background:var(--bg0);color:var(--t0)}
-#MainMenu,footer,header{visibility:hidden}
+#MainMenu,footer{visibility:hidden}
+header{background:transparent !important;}
+
 .stApp{background:var(--bg0)}
 .main .block-container{padding:.4rem .9rem 3rem;max-width:100%}
 
